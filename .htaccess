@@ -40,6 +40,11 @@ ErrorDocument 404 /404.html
   # `solutions/__next.solutions/__PAGE__.txt`. Sans cette réécriture, chaque
   # préchargement de lien renvoie un 404 (le site retombe sur une navigation
   # complète : rien ne casse, mais la console se remplit d'erreurs).
+  # Selon la plateforme du build, Next écrit ce fichier à plat
+  # (`__next.solutions.__PAGE__.txt`, build Linux de GitHub Actions) ou dans un
+  # dossier (`__next.solutions/__PAGE__.txt`, build Windows) : on ne réécrit que
+  # si le fichier demandé n'existe pas tel quel.
+  RewriteCond %{REQUEST_FILENAME} !-f
   RewriteRule ^(.+)/__next\.(.+)\.__PAGE__\.txt$ $1/__next.$2/__PAGE__.txt [L]
 </IfModule>
 
