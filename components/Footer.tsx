@@ -1,72 +1,69 @@
 import Link from "next/link";
-import Logomark from "./Logomark";
+import Container from "./Container";
+import Wordmark from "./Wordmark";
+import { CTA, NAV_LINKS, SITE } from "@/lib/site";
 
-const columns = [
-  {
-    title: "Site",
-    links: [
-      { href: "/platform", label: "Platform" },
-      { href: "/method", label: "Method" },
-      { href: "/sectors", label: "Sectors" },
-    ],
-  },
-  {
-    title: "Company",
-    links: [
-      { href: "/company", label: "Manifesto" },
-      { href: "/contact", label: "Contact" },
-    ],
-  },
-];
+const exploreLinks = [...NAV_LINKS, { href: "/contact/", label: "Contact" }];
+
+const heading = "font-mono text-[0.75rem] uppercase tracking-[0.14em] text-faint";
 
 export default function Footer() {
   return (
-    <footer className="bg-ink text-silver-300">
-      <div className="mx-auto max-w-[1280px] px-6 py-16 md:px-10 md:py-20">
-        <div className="flex flex-col justify-between gap-12 md:flex-row">
+    <footer className="bg-ink text-on-dark">
+      <Container className="py-16 md:py-20">
+        <div className="grid gap-12 md:grid-cols-[1.6fr_1fr_1fr]">
           <div>
-            <p className="flex items-center gap-2.5 text-xl font-extrabold tracking-tight text-silver-50">
-              <Logomark className="h-5 w-5" />
-              ExponentValue
+            <Wordmark tone="dark" alt="ExponentValue" />
+            <p className="mt-5 max-w-sm text-[0.95rem] leading-relaxed">
+              Des systèmes métier intelligents qui transforment les problèmes
+              opérationnels en valeur mesurable.
             </p>
-            <p className="mt-3 max-w-xs text-[0.92rem] leading-relaxed">
-              Multiply what matters. Governed AI agents for French-speaking
-              SMBs and mid-market companies.
-            </p>
+            <p className={`mt-5 ${heading}`}>{SITE.slogan}</p>
           </div>
-          <div className="flex gap-16 md:gap-24">
-            {columns.map((col) => (
-              <nav key={col.title} aria-label={col.title}>
-                <p className="font-mono text-[0.72rem] uppercase tracking-[0.18em] text-silver-400">
-                  {col.title}
-                </p>
-                <ul className="mt-4 space-y-3">
-                  {col.links.map((link) => (
-                    <li key={link.href}>
-                      <Link
-                        href={link.href}
-                        className="text-[0.92rem] transition-colors duration-150 hover:text-silver-50"
-                      >
-                        {link.label}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </nav>
-            ))}
+
+          <nav aria-label="Pied de page">
+            <p className={heading}>Explorer</p>
+            <ul className="mt-4 space-y-3">
+              {exploreLinks.map((link) => (
+                <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    className="text-[0.95rem] transition-colors duration-150 hover:text-paper"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+
+          <div>
+            <p className={heading}>Contact</p>
+            <ul className="mt-4 space-y-3 text-[0.95rem]">
+              <li>
+                <Link
+                  href={CTA.primary.href}
+                  className="transition-colors duration-150 hover:text-paper"
+                >
+                  {CTA.primary.label}
+                </Link>
+              </li>
+              <li>
+                <a
+                  href={`mailto:${SITE.email}`}
+                  className="transition-colors duration-150 hover:text-paper"
+                >
+                  {SITE.email}
+                </a>
+              </li>
+            </ul>
           </div>
         </div>
 
-        <div className="hairline-dark mt-14 flex flex-col gap-4 pt-7 sm:flex-row sm:items-center sm:justify-between">
-          <p className="font-mono text-[0.72rem] uppercase tracking-[0.18em] text-silver-400">
-            exponentvalue.com
-          </p>
-          <p className="text-[0.82rem] text-silver-400">
-            © {new Date().getFullYear()} ExponentValue. All rights reserved.
-          </p>
-          <Logomark className="h-[10px] w-[10px] text-silver-400" />
+        <div className="mt-14 border-t border-line-dark pt-7 text-[0.85rem] text-faint">
+          © {new Date().getFullYear()} ExponentValue. Tous droits réservés.
         </div>
-      </div>
+      </Container>
     </footer>
   );
 }

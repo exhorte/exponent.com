@@ -1,116 +1,136 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import Logomark from "./Logomark";
+import Container from "./Container";
+import Wordmark from "./Wordmark";
+import { buttonClasses } from "./Button";
+import { CTA, NAV_LINKS } from "@/lib/site";
 
-const links = [
-  { href: "/platform", label: "Platform" },
-  { href: "/method", label: "Method" },
-  { href: "/sectors", label: "Sectors" },
-  { href: "/company", label: "Company" },
-];
+/* `trailingSlash: true` : usePathname() renvoie "/entreprise/", les href aussi.
+   On compare sans slash final pour que le lien actif soit bien repéré. */
+const strip = (path: string) => path.replace(/\/+$/, "") || "/";
+
+/* Liens de la barre : pas d'anneau de focus, un simple soulignement fin au
+   clavier ; le lien de la page courante garde le même soulignement, en rouge. */
+const linkBase =
+  "py-2 text-[0.95rem] transition-colors duration-150 underline decoration-1 underline-offset-[10px] focus-visible:outline-none focus-visible:decoration-ink";
 
 export default function Nav() {
   const [open, setOpen] = useState(false);
-  const pathname = usePathname();
+  const pathname = strip(usePathname());
+  const toggleRef = useRef<HTMLButtonElement>(null);
 
-  /* Bloque le scroll du document quand le menu mobile est ouvert */
+  /* Menu mobile ouvert : Échap le ferme et rend le focus au bouton ; le
+     défilement de la page derrière est bloqué. */
   useEffect(() => {
-    document.documentElement.style.overflow = open ? "hidden" : "";
+    if (!open) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      setOpen(false);
+      toggleRef.current?.focus();
+    };
+    document.addEventListener("keydown", onKeyDown);
+    document.documentElement.style.overflow = "hidden";
     return () => {
+      document.removeEventListener("keydown", onKeyDown);
       document.documentElement.style.overflow = "";
     };
   }, [open]);
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50">
-      {/* Le backdrop-blur reste confiné à cette barre : posé sur le <header>,
-          il créerait un containing block qui piégerait l'overlay fixed du menu. */}
-      <div className="border-b border-silver-200 bg-silver-50/80 backdrop-blur-md">
-        <div className="mx-auto flex h-16 max-w-[1280px] items-center justify-between px-6 md:px-10">
-          <Link
-            href="/"
-            className="flex items-center gap-3 text-[1.05rem] font-extrabold tracking-tight text-graphite-900"
-          >
-            <Logomark className="h-5 w-5 text-graphite-900" />
-            ExponentValue
-          </Link>
+    <header className="sticky top-0 z-50 border-b border-line bg-paper">
+      <Container className="flex h-16 items-center justify-between">
+        <Link
+          href="/"
+          aria-label="ExponentValue — accueil"
+          className="text-ink"
+          onClick={() => setOpen(false)}
+        >
+          <Wordmark />
+        </Link>
 
-          <nav
-            className="hidden items-center gap-8 md:flex"
-            aria-label="Main navigation"
-          >
-            {links.map((link) => (
+        <nav
+          aria-label="Navigation principale"
+          className="hidden items-center gap-9 lg:flex"
+        >
+          {NAV_LINKS.map((link) => {
+            const active = strip(link.href) === pathname;
+            return (
               <Link
                 key={link.href}
                 href={link.href}
-                className={`text-[0.9rem] transition-colors duration-150 ${
-                  pathname === link.href
-                    ? "text-accent-blue"
-                    : "text-graphite-700 hover:text-graphite-900"
+                aria-current={active ? "page" : undefined}
+                className={`${linkBase} ${
+                  active
+                    ? "text-ink decoration-accent"
+                    : "text-muted decoration-transparent hover:text-ink"
                 }`}
               >
                 {link.label}
               </Link>
-            ))}
-            <Link
-              href="/contact"
-              className="bg-ink px-5 py-2.5 text-[0.85rem] font-medium text-silver-50 transition-colors duration-150 hover:bg-graphite-700"
-            >
-              Get in touch
-            </Link>
-          </nav>
-
-          <button
-            type="button"
-            className="flex h-10 w-10 flex-col items-center justify-center gap-1.5 md:hidden"
-            aria-expanded={open}
-            aria-controls="menu-mobile"
-            aria-label={open ? "Close menu" : "Open menu"}
-            onClick={() => setOpen((o) => !o)}
+            );
+          })}
+          <Link
+            href={CTA.primary.href}
+            className={buttonClasses("primary", "min-h-11 px-5 py-2.5")}
           >
-            <span
-              className={`h-px w-6 bg-graphite-900 transition-transform duration-150 ${
-                open ? "translate-y-[3.5px] rotate-45" : ""
-              }`}
-            />
-            <span
-              className={`h-px w-6 bg-graphite-900 transition-transform duration-150 ${
-                open ? "-translate-y-[3.5px] -rotate-45" : ""
-              }`}
-            />
-          </button>
-        </div>
-      </div>
+            {CTA.primary.label}
+          </Link>
+        </nav>
 
-      {/* Menu mobile plein écran sur fond --ink */}
+        <button
+          ref={toggleRef}
+          type="button"
+          className="-mr-2 flex h-11 w-11 flex-col items-center justify-center gap-1.5 lg:hidden"
+          aria-expanded={open}
+          aria-controls="mobile-menu"
+          aria-label={open ? "Fermer le menu" : "Ouvrir le menu"}
+          onClick={() => setOpen((value) => !value)}
+        >
+          <span
+            className={`h-0.5 w-6 bg-ink transition-transform duration-150 ${
+              open ? "translate-y-1 rotate-45" : ""
+            }`}
+          />
+          <span
+            className={`h-0.5 w-6 bg-ink transition-transform duration-150 ${
+              open ? "-translate-y-1 -rotate-45" : ""
+            }`}
+          />
+        </button>
+      </Container>
+
       {open && (
         <div
-          id="menu-mobile"
-          className="fixed inset-0 top-16 z-40 flex flex-col overflow-y-auto bg-ink px-6 py-10 md:hidden"
+          id="mobile-menu"
+          className="fixed inset-x-0 bottom-0 top-16 overflow-y-auto bg-ink px-6 py-8 sm:px-10 lg:hidden"
         >
-          <nav className="flex flex-col" aria-label="Mobile navigation">
-            {links.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                onClick={() => setOpen(false)}
-                className={`heading-md hairline-dark py-5 ${
-                  pathname === link.href ? "text-accent-blue" : "text-silver-50"
-                }`}
-              >
-                {link.label}
-              </Link>
-            ))}
+          <nav aria-label="Navigation mobile" className="flex flex-col">
+            {NAV_LINKS.map((link) => {
+              const active = strip(link.href) === pathname;
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  aria-current={active ? "page" : undefined}
+                  onClick={() => setOpen(false)}
+                  className={`t-h3 border-b border-line-dark py-5 ${
+                    active ? "text-paper underline decoration-accent-soft decoration-1 underline-offset-8" : "text-on-dark"
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
           </nav>
           <Link
-            href="/contact"
+            href={CTA.primary.href}
             onClick={() => setOpen(false)}
-            className="mt-10 inline-flex items-center justify-center bg-silver-50 px-7 py-4 text-[0.95rem] font-medium text-ink"
+            className={buttonClasses("inverse", "mt-8 w-full")}
           >
-            Get in touch
+            {CTA.primary.label}
           </Link>
         </div>
       )}

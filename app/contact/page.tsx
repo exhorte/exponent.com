@@ -1,40 +1,91 @@
 import type { Metadata } from "next";
-import Eyebrow from "@/components/Eyebrow";
-import Reveal from "@/components/Reveal";
+import ContactForm from "@/components/ContactForm";
+import Section from "@/components/Section";
+import SectionHeader from "@/components/SectionHeader";
+import { SITE, pageMetadata } from "@/lib/site";
 
-export const metadata: Metadata = {
-  title: "Contact",
+export const metadata: Metadata = pageMetadata({
+  title: "Value Scan et contact",
   description:
-    "Start your free AI Opportunity Scan: thirty minutes to identify what a first governed agent system would change in your operations.",
-};
+    "Découvrez où votre entreprise perd du temps et de la valeur. Décrivez-nous un problème opérationnel, nous l'examinerons ensemble.",
+  path: "/contact/",
+});
+
+const steps = [
+  {
+    title: "Décrivez le problème",
+    text: "Quelques lignes sur ce qui vous ralentit, et où cela se voit.",
+  },
+  {
+    title: "Nous l'examinons avec vous",
+    text: "Une conversation pour comprendre comment le travail se passe vraiment aujourd'hui.",
+  },
+  {
+    title: "Vous repartez avec une voie concrète",
+    text: "Les premières améliorations qui valent la peine, et dans quel ordre.",
+  },
+];
 
 export default function ContactPage() {
   return (
-    <section className="bg-radial-silver-soft min-h-[70svh]">
-      <div className="mx-auto max-w-[1280px] px-6 py-24 md:px-10 md:py-32">
-        <Reveal>
-          <Eyebrow>Contact</Eyebrow>
-          <h1 className="heading-hero mt-8 max-w-3xl text-graphite-900">
-            Your first AI diagnostic, free and without obligation.
-          </h1>
-          <p className="mt-8 max-w-2xl text-lg text-graphite-700">
-            Describe, in a few lines, the process costing you the most today.
-            A thirty-minute conversation is enough to evaluate what a first
-            governed agent system would actually change.
+    <Section labelledBy="contact-title">
+      <div className="grid gap-20 lg:grid-cols-[1fr_0.9fr] lg:gap-28">
+        <div>
+          <SectionHeader
+            id="contact-title"
+            as="h1"
+            size="display"
+            eyebrow="Value Scan"
+            title="Découvrez où votre entreprise perd du temps et de la valeur."
+          >
+            Repérez les frictions opérationnelles, hiérarchisez les
+            améliorations possibles et découvrez ce que vous pourriez
+            améliorer en premier.
+          </SectionHeader>
+
+          <p className="mt-8 max-w-xl text-[0.95rem] leading-relaxed text-muted">
+            Aujourd&rsquo;hui, le Value Scan est une conversation guidée, pas
+            un diagnostic automatique. Vous décrivez un problème, nous
+            l&rsquo;examinons ensemble.
           </p>
-          <div className="hairline mt-12 max-w-2xl pt-10">
+
+          <ol className="mt-14 space-y-9">
+            {steps.map((step, index) => (
+              <li key={step.title} className="flex gap-6">
+                <span className="font-mono text-[0.85rem] text-accent-deep">
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+                <div>
+                  <h2 className="t-h3">{step.title}</h2>
+                  <p className="mt-2 max-w-md leading-relaxed text-muted">
+                    {step.text}
+                  </p>
+                </div>
+              </li>
+            ))}
+          </ol>
+
+          <p className="mt-14 text-[0.95rem] text-muted">
+            Vous préférez écrire directement ?{" "}
             <a
-              href="mailto:contact@exponentvalue.com"
-              className="text-[clamp(1.5rem,3.5vw,2.2rem)] font-normal tracking-tight text-graphite-900 underline decoration-accent-blue decoration-2 underline-offset-8 transition-colors duration-150 hover:text-accent-blue"
+              href={`mailto:${SITE.email}`}
+              className="font-medium text-ink underline underline-offset-4"
             >
-              contact@exponentvalue.com
+              {SITE.email}
             </a>
-            <p className="mt-6 text-[0.95rem] text-graphite-700">
-              We reply personally, within 48 business hours.
-            </p>
+          </p>
+        </div>
+
+        <div className="lg:pt-2">
+          <h2 className="t-h3">Dites-nous ce qui vous ralentit</h2>
+          <p className="mt-2 text-[0.92rem] text-muted">
+            Les champs marqués * sont obligatoires.
+          </p>
+          <div className="mt-8">
+            <ContactForm />
           </div>
-        </Reveal>
+        </div>
       </div>
-    </section>
+    </Section>
   );
 }

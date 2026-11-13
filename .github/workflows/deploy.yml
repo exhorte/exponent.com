@@ -1,0 +1,59 @@
+# Construit le site statique (Next.js, output: "export") à chaque push sur main
+# et publie le résultat (out/) sur la branche `deploy`.
+#
+# Hostinger (hPanel > Avancé > GIT) suit la branche `deploy` : chaque nouveau
+# commit dessus est tiré dans public_html. `main` reste la seule branche de
+# travail ; `deploy` ne se modifie jamais à la main.
+name: Build et publication (branche deploy)
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Seule permission nécessaire : pousser sur la branche deploy avec le jeton
+# fourni par GitHub (aucun secret à créer).
+permissions:
+  contents: write
+
+# Un seul déploiement à la fois, sans jamais en annuler un en cours.
+concurrency:
+  group: publish-deploy
+  cancel-in-progress: false
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Installer les dépendances
+        run: npm ci
+
+      - name: Construire le site
+        run: npm run build
+
+      - name: Vérifier la sortie avant de publier
+        run: |
+          test -f out/index.html
+          test -f out/404.html
+          test -f out/contact/index.html
+          # .htaccess est un fichier caché : il doit être dans out/, et protéger .git.
+          test -f out/.htaccess
+          grep -q 'RedirectMatch 404 /\\.git' out/.htaccess
+
+      - name: Publier out/ sur la branche deploy
+        env:
+          SOURCE_SHA: ${{ github.sha }}
+        run: |
+          git config user.name  "$GITHUB_ACTOR"
+          git config user.email "${GITHUB_ACTOR_ID}+${GITHUB_ACTOR}@users.noreply.github.com"
+          bash .github/scripts/publish-deploy.sh

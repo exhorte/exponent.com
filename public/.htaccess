@@ -6,6 +6,25 @@
 # au lieu du 404 de la marque généré par Next.
 ErrorDocument 404 /404.html
 
+# --- Anciennes URL (V1 -> V2) ---------------------------------------------
+# Les pages ont été renommées pour suivre la navigation. 301 permanent pour
+# conserver les liens existants et le référencement.
+<IfModule mod_alias.c>
+  RedirectMatch 301 ^/platform/?$ /exponentos/
+  RedirectMatch 301 ^/method/?$ /methode/
+  RedirectMatch 301 ^/sectors/?$ /solutions/
+  RedirectMatch 301 ^/company/?$ /entreprise/
+</IfModule>
+
+# --- Dépôt Git ----------------------------------------------------------
+# Le déploiement par Git de Hostinger clone la branche `deploy` directement
+# dans public_html : le dossier .git (et .github, .gitignore…) ne doit jamais
+# être servi. À vérifier après chaque changement de mode de déploiement :
+# https://exponentvalue.com/.git/HEAD doit répondre 404, jamais 200.
+<IfModule mod_alias.c>
+  RedirectMatch 404 /\.git
+</IfModule>
+
 # --- HTTPS --------------------------------------------------------------
 <IfModule mod_rewrite.c>
   RewriteEngine On
@@ -15,6 +34,13 @@ ErrorDocument 404 /404.html
   RewriteCond %{HTTPS} !=on
   RewriteCond %{HTTP:X-Forwarded-Proto} !https
   RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+  # Navigation côté client (Next 16, export statique) : le navigateur demande
+  # `solutions/__next.solutions.__PAGE__.txt` alors que le fichier exporté est
+  # `solutions/__next.solutions/__PAGE__.txt`. Sans cette réécriture, chaque
+  # préchargement de lien renvoie un 404 (le site retombe sur une navigation
+  # complète : rien ne casse, mais la console se remplit d'erreurs).
+  RewriteRule ^(.+)/__next\.(.+)\.__PAGE__\.txt$ $1/__next.$2/__PAGE__.txt [L]
 </IfModule>
 
 # --- Cache --------------------------------------------------------------
