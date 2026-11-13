@@ -48,7 +48,7 @@ jobs:
           test -f out/contact/index.html
           # .htaccess est un fichier caché : il doit être dans out/, et protéger .git.
           test -f out/.htaccess
-          grep -q 'RedirectMatch 404 /\\.git' out/.htaccess
+          grep -qF 'RedirectMatch 404 /\.git' out/.htaccess
 
       - name: Publier out/ sur la branche deploy
         env:
