@@ -54,7 +54,25 @@ Le site est statique : aucun serveur n'envoie le message. `components/ContactFor
 
 ## Déploiement
 
-1. `npm run build`
-2. Envoyer le contenu de `out/` (y compris `.htaccess`, fichier caché) dans `public_html` de `exponentvalue.com`, en supprimant les anciens fichiers : `platform/`, `method/`, `sectors/`, `company/` et `videos/` n'existent plus. Les anciennes URL redirigent (301) via `.htaccess` : `/platform` → `/exponentos`, `/method` → `/methode`, `/sectors` → `/solutions`, `/company` → `/entreprise`.
+Le déploiement est **automatique** (depuis le 2026-11-13). Ne plus envoyer `out/` à la main dans `public_html`.
 
-`.htaccess` contient aussi une réécriture pour les fichiers de préchargement de Next (`__next.<page>.__PAGE__.txt`). Elle est validée en local par un serveur de test, pas encore sur Hostinger : vérifier la console du navigateur après la mise en ligne.
+```
+push sur main ──► GitHub Actions : npm ci + npm run build ──► out/ publié sur la branche `deploy`
+                                                                   │
+                              Hostinger (hPanel > Avancé > GIT) tire `deploy` dans public_html
+```
+
+1. Avant de pousser : `npm run lint` et `npm run build`.
+2. `git push origin main` : le workflow `.github/workflows/deploy.yml` construit le site et pousse `out/` sur la branche `deploy` (suivi dans l'onglet Actions de GitHub, environ 1 minute 30).
+3. Hostinger déploie `deploy` dans `public_html` quelques secondes plus tard (hPanel > Sites web > exponentvalue.com > Avancé > GIT, ligne « Dernier déploiement »).
+4. Contrôler le site en ligne. Si une page ancienne reste servie : Tableau de bord > Cache > Vider le cache.
+
+Règles :
+- **`main` est la seule branche de travail.** `deploy` est écrite par le workflow : ne jamais y commiter. Hostinger ne doit suivre que `deploy` (suivre `main` déploierait le code source et casserait le site).
+- Ne pas désactiver « Déploiement automatique » dans hPanel et ne plus modifier `public_html` à la main (Gestionnaire de fichiers, FTP).
+- Si le build échoue sur GitHub, `deploy` ne bouge pas et le site reste sur sa dernière version : corriger, pousser de nouveau.
+- Retour arrière : `git revert` du commit fautif sur `main`, puis push.
+
+`public/.htaccess` (copié dans `out/` puis dans `public_html`) porte : HTTPS, page 404, 301 des anciennes URL (`/platform` → `/exponentos`, `/method` → `/methode`, `/sectors` → `/solutions`, `/company` → `/entreprise`), cache, blocage de `.git`, et la réécriture des fichiers de préchargement de Next (`__next.<page>.__PAGE__.txt`). Selon la plateforme, Next les écrit à plat (build Linux de GitHub) ou dans un dossier (build Windows) : la réécriture ne s'applique que si le fichier demandé n'existe pas.
+
+Détail, preuves et points non vérifiés : `05_release/Fiche-deploiement.md` dans le vault.
