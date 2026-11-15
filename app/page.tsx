@@ -1,22 +1,40 @@
+import Image from "next/image";
 import Link from "next/link";
 import ArrowLink from "@/components/ArrowLink";
 import Button from "@/components/Button";
 import Container from "@/components/Container";
 import Eyebrow from "@/components/Eyebrow";
-import FlowDiagram from "@/components/FlowDiagram";
+import MethodSteps from "@/components/MethodSteps";
 import OSDiagram from "@/components/OSDiagram";
 import Section from "@/components/Section";
 import SectionHeader from "@/components/SectionHeader";
-import { families, osConcepts, problems, workSteps } from "@/lib/content";
+import { families, osConcepts, problems } from "@/lib/content";
 import { CTA, SITE } from "@/lib/site";
 
 export default function Home() {
   return (
     <>
-      {/* 1 — HERO : typographie et parcours en texte, aucun média, aucun cadre */}
-      <section className="bg-ink text-paper">
-        <Container className="grid gap-16 py-20 md:py-28 lg:grid-cols-[1.4fr_0.6fr] lg:items-center lg:gap-24 lg:py-32">
-          <div>
+      {/* 1 — HERO : l'image (main humaine, main robotique, anneau lumineux,
+          détourés) à gauche, plus étroite ; le message à droite. Sur mobile,
+          le message passe en premier. */}
+      <section
+        data-nav-theme="dark"
+        className="overflow-hidden bg-ink text-paper"
+      >
+        <Container className="grid items-center gap-12 pb-20 pt-10 md:pb-28 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:gap-16 lg:pb-32 lg:pt-12 xl:gap-24">
+          <div className="order-2 mx-auto w-full max-w-[18rem] sm:max-w-[22rem] lg:order-1 lg:max-w-[30rem]">
+            <div className="hero-visual relative">
+              <Image
+                src="/images/hero-mains-cercle.webp"
+                alt=""
+                width={564}
+                height={705}
+                preload
+                className="relative h-auto w-full"
+              />
+            </div>
+          </div>
+          <div className="order-1 lg:order-2">
             <Eyebrow dark>{SITE.slogan}</Eyebrow>
             <h1 className="t-hero mt-6 max-w-4xl">
               <span className="text-faint">
@@ -33,7 +51,6 @@ export default function Home() {
               </Button>
             </div>
           </div>
-          <FlowDiagram />
         </Container>
       </section>
 
@@ -105,28 +122,23 @@ export default function Home() {
         </div>
       </Section>
 
-      {/* 4 — NOTRE MÉTHODE : trois temps */}
-      <Section labelledBy="work-title">
-        <SectionHeader
-          id="work-title"
-          eyebrow="Notre méthode"
-          title="Du problème opérationnel à l'amélioration mesurable."
-        />
-        <ol className="mt-16 grid gap-12 md:grid-cols-3 lg:gap-20">
-          {workSteps.map((step) => (
-            <li key={step.number}>
-              <span className="font-mono text-[0.85rem] text-accent-deep">
-                {step.number}
-              </span>
-              <h3 className="t-h3 mt-4">{step.title}</h3>
-              <p className="mt-3 max-w-sm leading-relaxed text-muted">
-                {step.text}
-              </p>
-            </li>
-          ))}
-        </ol>
-        <div className="mt-16">
-          <ArrowLink href="/methode/">Découvrir notre méthode</ArrowLink>
+      {/* 4 — NOTRE MÉTHODE : trois temps, en cartes animées au défilement.
+          L'en-tête reste visible à gauche pendant que les cartes défilent.
+          `overflow-x-clip` (et non `hidden`) : les cartes qui glissent ne
+          créent pas de défilement horizontal, et l'en-tête collant marche. */}
+      <Section labelledBy="work-title" className="overflow-x-clip">
+        <div className="grid gap-14 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:gap-20">
+          <div className="lg:sticky lg:top-32 lg:self-start">
+            <SectionHeader
+              id="work-title"
+              eyebrow="Notre méthode"
+              title="Du problème opérationnel à l'amélioration mesurable."
+            />
+            <div className="mt-10">
+              <ArrowLink href="/methode/">Découvrir notre méthode</ArrowLink>
+            </div>
+          </div>
+          <MethodSteps />
         </div>
       </Section>
 

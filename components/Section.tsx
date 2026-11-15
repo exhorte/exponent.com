@@ -30,6 +30,8 @@ export default function Section({
     <section
       id={id}
       aria-labelledby={labelledBy}
+      /* La barre de navigation passe en verre sombre au-dessus des sections sombres */
+      data-nav-theme={tone === "dark" ? "dark" : undefined}
       className={`${tones[tone]} ${className}`}
     >
       <Container className="py-20 md:py-28 lg:py-32">{children}</Container>

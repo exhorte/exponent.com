@@ -5,8 +5,8 @@
    Le logo (kit exports_v2) est en noir et blanc. Le rouge-orangé #ec3013,
    hérité de l'ancienne carte sociale, est conservé comme unique accent, en
    petit : numéros, lien actif, erreurs.
-   Aucune image ni vidéo décorative : la hiérarchie vient de la typographie,
-   des filets et des surfaces.
+   Une seule image, dans le hero (les mains et l'anneau lumineux, détourés) ;
+   ailleurs, la hiérarchie vient de la typographie, des filets et des surfaces.
    ———————————————————————————————————————————————— */
 :root {
   --paper: #ffffff;
@@ -21,6 +21,13 @@
   --accent: #ec3013;
   --accent-deep: #b8260d;
   --accent-soft: #ff7a5f;
+  /* Barre de navigation flottante : verre clair ou sombre selon la surface */
+  --glass-light: rgb(255 255 255 / 0.72);
+  --glass-dark: rgb(40 43 49 / 0.55);
+  /* Halo de l'anneau de l'image du hero (cyan relevé sur l'image) */
+  --halo: #4cc9ff;
+  /* Espace réservé sous la barre flottante : 12 px + 64 px + 12 px */
+  --nav-offset: 5.5rem;
 }
 
 @theme inline {
@@ -36,6 +43,9 @@
   --color-accent: var(--accent);
   --color-accent-deep: var(--accent-deep);
   --color-accent-soft: var(--accent-soft);
+  --color-glass-light: var(--glass-light);
+  --color-glass-dark: var(--glass-dark);
+  --color-halo: var(--halo);
 
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, "SFMono-Regular",
@@ -47,8 +57,15 @@
    ———————————————————————————————————————————————— */
 html {
   scroll-behavior: smooth;
-  /* Réserve la hauteur de l'en-tête collant pour les ancres (#finance…) */
-  scroll-padding-top: 5rem;
+  /* Réserve la hauteur de la barre flottante pour les ancres (#finance…) */
+  scroll-padding-top: calc(var(--nav-offset) + 1rem);
+}
+
+/* La barre de navigation flotte au-dessus du contenu (position fixe) : la
+   première section de chaque page commence sous elle, et son fond passe
+   derrière la barre (effet de verre). */
+#main > section:first-child {
+  padding-top: var(--nav-offset);
 }
 
 body {
@@ -127,9 +144,100 @@ body {
 }
 
 /* ————————————————————————————————————————————————
-   MOUVEMENT — uniquement des transitions de retour visuel
-   (survol, focus). Rien ne bouge seul, rien ne dépend du scroll.
+   MOUVEMENT
+   - Survol et focus : transitions courtes.
+   - Hero : l'image flotte lentement et son halo respire.
+   - Méthode : chaque carte glisse en entrant ; sa forme se trace quand la
+     carte arrive et se retire quand elle sort. `--enter` et `--draw`
+     (0 → 1) sont posés par MethodSteps.tsx selon le défilement. Sans
+     JavaScript, ou avec « réduire les animations », ils valent 1 : tout est
+     visible et rien ne bouge.
    ———————————————————————————————————————————————— */
+.hero-visual {
+  animation: hero-float 9s ease-in-out infinite;
+}
+
+/* Halo derrière l'anneau (l'image est centrée sur lui) */
+.hero-visual::before {
+  content: "";
+  position: absolute;
+  inset: 16% 6%;
+  border-radius: 9999px;
+  background: radial-gradient(
+    closest-side,
+    color-mix(in srgb, var(--halo) 30%, transparent),
+    transparent 75%
+  );
+  filter: blur(28px);
+  pointer-events: none;
+  animation: hero-halo 6s ease-in-out infinite;
+}
+
+@keyframes hero-float {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -10px, 0);
+  }
+}
+
+@keyframes hero-halo {
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.step-card {
+  --enter: 1;
+  --draw: 1;
+  --shift: 3rem;
+  transform: translate3d(calc((1 - var(--enter)) * var(--shift)), 0, 0);
+  opacity: calc(0.12 + 0.88 * var(--enter));
+}
+
+/* Une carte sur deux arrive de l'autre côté */
+.step-card:nth-child(even) {
+  --shift: -3rem;
+}
+
+/* Le « panneau fantôme » : un cadre décalé qui rejoint la carte en entrant,
+   puis disparaît. */
+.step-ghost {
+  position: absolute;
+  inset: 0;
+  border: 1px solid var(--line);
+  pointer-events: none;
+  transform: translate3d(
+    calc((1 - var(--enter)) * var(--shift) * 2.5),
+    calc((1 - var(--enter)) * -1.25rem),
+    0
+  );
+  opacity: calc(1 - var(--enter));
+}
+
+/* Traits des formes : chaque tracé (pathLength = 1) se dessine à son tour.
+   `--i` = rang du tracé, `--n` = nombre de tracés de la forme. Le motif
+   « 1 2 » (trait 1, vide 2) évite un point résiduel en bout de tracé. */
+.step-shape .trace {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.25;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1 2;
+  stroke-dashoffset: calc(1 - clamp(0, var(--draw) * var(--n) - var(--i), 1));
+}
+
+.step-shape .trace.accent {
+  stroke: var(--accent);
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -138,5 +246,10 @@ body {
   *::before,
   *::after {
     transition-duration: 0.01ms !important;
+    animation: none !important;
+  }
+  .step-card {
+    --enter: 1 !important;
+    --draw: 1 !important;
   }
 }

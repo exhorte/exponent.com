@@ -40,7 +40,9 @@ Source : le kit `06_assets/Exponentvalue branding assets/exports_v2` du vault. L
 
 ## Principes
 
-- Aucune vidéo ni image décorative, aucun cadre autour des schémas : la hiérarchie vient de la typographie, de l'espace et de filets fins.
+- Une seule image, dans le hero : `public/images/hero-mains-cercle.webp` (main humaine, main robotique et anneau lumineux, détourés sur fond transparent ; source 564 × 705 px). Ailleurs, aucune vidéo ni image décorative, aucun cadre autour des schémas : la hiérarchie vient de la typographie, de l'espace et de filets fins.
+- Barre de navigation flottante (`components/Nav.tsx`) : détachée du haut, en verre clair au-dessus des fonds clairs et en verre sombre au-dessus des surfaces qui portent `data-nav-theme="dark"` (hero, sections `tone="dark"`, pied de page). La première section de chaque page réserve sa hauteur (`--nav-offset`).
+- Mouvement mesuré : l'image du hero flotte et son halo respire ; les cartes de la méthode (`components/MethodSteps.tsx`) glissent en entrant et leurs formes au trait se tracent puis se retirent selon le défilement. Tout s'arrête avec « réduire les animations », et tout reste visible sans JavaScript.
 - Pas de marqueur rouge devant les titres. Le rouge `#ec3013` (hérité de l'ancienne carte sociale ; le nouveau logo est noir et blanc) reste discret : numéros, lien actif, messages d'erreur.
 - Une seule largeur de page, `components/Container.tsx` : en-tête, sections et pied de page s'alignent sur les mêmes bords.
 - Focus clavier discret : filet de 1 px (règle globale dans `app/globals.css`) et simple soulignement pour les liens de la navigation.

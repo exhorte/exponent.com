@@ -9,7 +9,7 @@ const heading = "font-mono text-[0.75rem] uppercase tracking-[0.14em] text-faint
 
 export default function Footer() {
   return (
-    <footer className="bg-ink text-on-dark">
+    <footer data-nav-theme="dark" className="bg-ink text-on-dark">
       <Container className="py-16 md:py-20">
         <div className="grid gap-12 md:grid-cols-[1.6fr_1fr_1fr]">
           <div>
